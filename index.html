@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>布莱顿吃喝玩乐攻略 — Brighton Eats · Drinks · Play</title>
+
+  <!-- Basic SEO -->
+  <meta name="description" content="布莱顿吃喝玩乐全攻略：美食、景点、娱乐、实用行程与互动地图。包含港地 HK PLACE、翡翠轩、布莱顿码头等推荐。" />
+  <meta name="keywords" content="Brighton, 布莱顿, 旅游, 吃喝玩乐, 美食, 景点, 地图" />
+  <meta name="author" content="Brighton Guide" />
+  <link rel="canonical" href="https://yourdomain.example/ (put-your-url-here)" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="布莱顿吃喝玩乐攻略" />
+  <meta property="og:description" content="布莱顿详细吃喝玩乐指南 + 互动地图。港地 HK PLACE、翡翠轩、布莱顿码头等实用信息一览。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.example/" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="布莱顿吃喝玩乐攻略" />
+  <meta name="twitter:description" content="布莱顿吃喝玩乐全攻略 + 互动地图" />
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop" />
+
+  <!-- Structured data (Organization + WebPage) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "布莱顿吃喝玩乐攻略",
+        "url": "https://yourdomain.example/",
+        "logo": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop"
+      },
+      {
+        "@type": "WebPage",
+        "name": "布莱顿吃喝玩乐攻略",
+        "description": "布莱顿吃喝玩乐全攻略：美食、景点、娱乐、实用行程与互动地图。",
+        "url": "https://yourdomain.example/"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Fonts & libs -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- AOS for scroll animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+  <style>
+    :root{
+      --accent: #ff6363;
+      --bg: #fafbfd;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --text: #0f172a;
+    }
+    :root[data-theme="dark"]{
+      --accent: #ff7b7b;
+      --bg: #0b1220;
+      --card: #0f172a;
+      --muted: #9aa4b2;
+      --text: #e6eef7;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      margin:0; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+      line-height:1.6;
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    /* ===============================
+       BACKGROUND EFFECT LAYERS (DO NOT TOUCH CONTENT)
+       - particle layer (tsParticles)
+       - aurora gradient layer (CSS radial / blur)
+       - mouse light (follows cursor)
+       - wave svg at bottom of hero
+       ================================ */
+
+    /* container for all effects behind content */
+    .bg-effects {
+      position: fixed;
+      inset: 0;
+      z-index: 0; /* behind everything */
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* particles canvas (tsParticles will use #tsparticles) */
+    #tsparticles {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.85;
+      mix-blend-mode: screen;
+      filter: saturate(1.05) contrast(1.05) blur(0.15px);
+    }
+
+    /* aurora blobs */
+    .aurora {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .aurora .blob {
+      position: absolute;
+      width: 70vmax;
+      height: 70vmax;
+      left: -10%;
+      top: -30%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,99,99,0.18), rgba(255,154,158,0.06) 30%, rgba(0,0,0,0) 60%);
+      filter: blur(60px) saturate(1.2);
+      transform: translate3d(0,0,0);
+      animation: auroraMove 14s linear infinite;
+      will-change: transform, opacity;
+      mix-blend-mode: screen;
+      opacity: 0.9;
+    }
+    .aurora .blob.b2 {
+      left: 40%;
+      top: -10%;
+      background: radial-gradient(circle at 60% 40%, rgba(120,160,255,0.12), rgba(100,200,255,0.04) 30%, rgba(0,0,0,0) 60%);
+      filter: blur(80px);
+      animation-duration: 20s;
+      opacity: 0.95;
+    }
+    .aurora .blob.b3 {
+      left: 10%;
+      top: 50%;
+      background: radial-gradient(circle at 40% 40%, rgba(255,220,120,0.08), rgba(255,160,80,0.02) 40%, rgba(0,0,0,0) 60%);
+      filter: blur(90px) hue-rotate(-6deg);
+      animation-duration: 26s;
+      opacity: 0.85;
+    }
+    @keyframes auroraMove {
+      0% { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+      50% { transform: translate3d(8vw,4vh,0) scale(1.03) rotate(3deg); }
+      100% { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+    }
+
+    /* mouse-follow light (soft circular glow) */
+    .cursor-light {
+      position: fixed;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      left: 50%;
+      top: 50%;
+      mix-blend-mode: overlay;
+      transform: translate(-50%, -50%) scale(0.7);
+      transition: transform 0.12s linear, opacity 0.12s linear;
+      opacity: 0.9;
+      background: radial-gradient(circle at 40% 35%, rgba(255,255,255,0.18), rgba(255,140,120,0.06) 18%, rgba(0,0,0,0) 45%), radial-gradient(circle at 60% 60%, rgba(100,180,255,0.09), rgba(0,0,0,0) 35%);
+      filter: blur(24px) saturate(1.1);
+    }
+    .cursor-light.hidden{opacity:0}
+
+    /* subtle low-opacity wave overlay in hero */
+    .hero-wave {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 30vh;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0.12;
+      mix-blend-mode: screen;
+      transform: translateZ(0);
+    }
+    .hero-wave svg { width:100%; height:100%; display:block; }
+
+    /* content layout: ensure content sits above layers */
+    header, main, footer, .wrap, .card, .mapbox, .sidepanel { position: relative; z-index: 4; }
+
+    /* header */
+    header{
+      background: linear-gradient(120deg, rgba(0,0,0,0.5), rgba(0,0,0,0.18)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat;
+      color:#fff;
+      padding:2.3rem 1rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:56vh;
+    }
+
+    .wrap{max-width:1150px;margin:0 auto;width:100%}
+
+    .toprow{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{font-weight:700;font-size:1.4rem}
+    .controls{display:flex;gap:0.5rem;align-items:center}
+    .control-btn{background:rgba(255,255,255,0.12);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .control-btn:hover{background:rgba(255,255,255,0.18)}
+
+    /* search input */
+    .searchbar{display:flex;gap:.5rem;align-items:center}
+    .searchbar input[type="search"]{
+      padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);min-width:220px;background:rgba(255,255,255,0.06);color:#fff;
+      outline:none;font-weight:500;
+    }
+    .searchbar input::placeholder{opacity:.9;color:#fff}
+
+    .hero{margin-top:2.2rem;text-align:center}
+    .hero h1{font-size:2.6rem;margin:0 0 .6rem;font-weight:800}
+    .hero p{max-width:800px;margin:0 auto;color:rgba(255,255,255,0.92);font-weight:400}
+
+    .hero .cta{margin-top:1rem;padding:10px 18px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;text-decoration:none;display:inline-block}
+
+    main{max-width:1150px;margin:0 auto;padding:2rem 1rem 4rem}
+
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+    @media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:680px){.grid{grid-template-columns:1fr}}
+
+    .card{
+      background:var(--card);border-radius:14px;padding:1.1rem;box-shadow:0 8px 22px rgba(2,6,23,0.06);
+      transition:transform .28s ease,box-shadow .28s ease,background .28s;
+    }
+    [data-theme="dark"] .card{box-shadow:0 6px 18px rgba(2,6,23,0.3)}
+    .card:hover{transform:translateY(-8px);box-shadow:0 18px 42px rgba(2,6,23,.12)}
+    .thumb{height:170px;border-radius:10px;background-size:cover;background-position:center;margin-bottom:.8rem;filter:brightness(.95)}
+    .title{color:var(--accent);font-weight:700;margin-bottom:.35rem}
+    .muted{color:var(--muted);font-size:.97rem}
+    .meta{margin-top:.6rem;font-size:.95rem;color:var(--muted)}
+
+    /* map + side */
+    .layout{display:grid;grid-template-columns:1fr 460px;gap:1.25rem;margin-top:1.5rem}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}}
+    .mapbox{border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    #map{width:100%;height:560px}
+    .sidepanel{padding:1rem;background:var(--card);border-radius:14px;height:560px;overflow:auto}
+    .place-item{display:flex;gap:.6rem;padding:.6rem;border-radius:8px;align-items:center;cursor:pointer}
+    .place-item:hover{background:linear-gradient(90deg, rgba(255,99,99,0.06), rgba(255,154,158,0.03))}
+    .place-thumb{width:64px;height:48px;background-size:cover;background-position:center;border-radius:8px;flex-shrink:0}
+
+    /* small utility */
+    .row{display:flex;gap:1rem;flex-wrap:wrap}
+    .pill{display:inline-block;padding:.28rem .5rem;border-radius:999px;background:linear-gradient(90deg,var(--accent),#ff9a9e);color:#fff;font-weight:700;font-size:.83rem}
+    footer{padding:2rem 1rem;text-align:center;color:var(--muted);font-size:.95rem;margin-top:2rem}
+
+    /* night toggle position on mobile */
+    @media(max-width:540px){.controls{flex-direction:column;align-items:flex-end}}
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND EFFECTS (added) -->
+  <div class="bg-effects" aria-hidden="true">
+    <!-- aurora blobs -->
+    <div class="aurora" aria-hidden="true">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+    </div>
+
+    <!-- tsParticles canvas -->
+    <div id="tsparticles" aria-hidden="true"></div>
+
+    <!-- mouse light -->
+    <div class="cursor-light" id="cursorLight" aria-hidden="true"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="wrap" style="width:100%;">
+      <div class="toprow">
+        <div class="brand">布莱顿吃喝玩乐</div>
+
+        <div class="controls" aria-hidden="false">
+          <div class="searchbar" title="站内搜索">
+            <input id="globalSearch" type="search" placeholder="搜索：美食 / 景点 / 名称（回车或点击放大镜）" />
+            <button id="searchBtn" class="control-btn">🔍</button>
+          </div>
+
+          <div style="width:8px"></div>
+
+          <button id="themeToggle" class="control-btn" title="切换深色/浅色">🌓 夜间</button>
+        </div>
+      </div>
+
+      <div class="hero" role="banner" aria-label="布莱顿吃喝玩乐">
+        <h1>布莱顿吃喝玩乐全攻略</h1>
+        <p>探索英国南海岸的明珠——布莱顿，这里有迷人的海滨风光、丰富的美食文化和独特的娱乐场景。</p>
+        <a class="cta" href="#map-section">查看地图</a>
+
+        <!-- subtle wave overlay -->
+        <div class="hero-wave" aria-hidden="true">
+          <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#ffffff" stop-opacity="0.06"/>
+                <stop offset="1" stop-color="#ff9a9e" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <path fill="url(#g1)" d="M0,160L48,170.7C96,181,192,203,288,213.3C384,224,480,224,576,213.3C672,203,768,181,864,170.7C960,160,1056,160,1152,176C1248,192,1344,224,1392,240L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <!-- FILTER / TAGS -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+      <div class="row">
+        <button class="pill" data-filter="all" onclick="filterCategory('all')">全部</button>
+        <button class="pill" data-filter="eat" onclick="filterCategory('eat')">美食</button>
+        <button class="pill" data-filter="play" onclick="filterCategory('play')">景点</button>
+        <button class="pill" data-filter="drink" onclick="filterCategory('drink')">娱乐</button>
+      </div>
+
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <label style="font-size:.95rem;color:var(--muted);margin-right:.4rem">地图定位：</label>
+        <input id="mapSearch" placeholder="输入地点名，例如：Brighton Pier" style="padding:8px 10px;border-radius:8px;border:1px solid #ddd" />
+        <button id="mapSearchBtn" class="control-btn">定位</button>
+      </div>
+    </div>
+
+    <!-- CARDS GRID -->
+    <section aria-labelledby="exploreTitle">
+      <h2 id="exploreTitle" class="section-title">美食 · 景点 · 娱乐</h2>
+
+      <div class="grid" id="cardsGrid">
+        <!-- Card: 港地 HK PLACE (eat) -->
+        <article class="card" data-category="eat" data-name="港地 HK PLACE">
+          <div class="thumb" style="background-image:url('https://dynamic-media-cdn.tripadvisor.com/media/photo-o/29/47/17/c4/caption.jpg?w=1400&h=800&s=1')"></div>
+          <div class="title">港地 HK PLACE</div>
+          <p class="muted">正宗港式茶餐厅，提供地道的港式点心、煲仔饭和奶茶。环境舒适，充满港式怀旧风情。</p>
+          <p class="meta"><strong>地址：</strong>37 Preston St, Brighton BN1 2HP</p>
+          <p class="meta"><strong>推荐指数：</strong>★★★★☆</p>
+        </article>
+
+        <!-- Card: 翡翠轩 厨屋面馆&KTV (eat/drink?) -->
+        <article class="card" data-category="eat" data-name="翡翠轩 厨屋面馆&KTV">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80')"></div>
+          <div class="title">翡翠轩 厨屋面馆&KTV</div>
+          <p class="muted">中餐厅提供各种中式美食，特色面条和KTV娱乐一体，适合家庭聚餐和朋友聚会。</p>
+          <p class="meta"><strong>地址：</strong>29 Western road Hove BN3 1AF</p>
+          <p class="meta"><strong>联系电话：</strong>01273 778180</p>
+          <p class="meta"><strong>推荐指数：</strong>★★★★☆</p>
+        </article>
+
+        <!-- Card: Brighton Pier (play) -->
+        <article class="card" data-category="play" data-name="布莱顿码头 Brighton Pier">
+          <div class="thumb" style="background-image:url('https://i.postimg.cc/k4m3cWtC/100513000000u764p4ED0.jpg')"></div>
+          <div class="title">布莱顿码头 (Brighton Pier)</div>
+          <p class="muted">标志性海滨，游乐设施、小吃店、拍照点，适合家庭或朋友出行。</p>
+          <p class="meta"><strong>开放时间：</strong>全年开放，10:00-23:00</p>
+          <p class="meta"><strong>门票：</strong>免费入场，游乐设施单独收费</p>
+        </article>
+
+        <!-- Card: Royal Pavilion (play) -->
+        <article class="card" data-category="play" data-name="皇家穹顶宫 Royal Pavilion">
+          <div class="thumb" style="background-image:url('https://i.postimg.cc/Z9VMYBHt/R.jpg')"></div>
+          <div class="title">皇家穹顶宫 (Royal Pavilion)</div>
+          <p class="muted">摄政时期的异域风情宫殿，为乔治四世所建。独特的印度伊斯兰风格建筑和奢华内饰令人叹为观止。</p>
+          <p class="meta"><strong>开放时间：</strong>9:00-17:00</p>
+          <p class="meta"><strong>门票：</strong>成人£17.50，儿童£10.00</p>
+        </article>
+
+        <!-- Card: Brighton Museum (play) -->
+        <article class="card" data-category="play" data-name="布莱顿博物馆 Brighton Museum">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80')"></div>
+          <div class="title">布莱顿博物馆与美术馆</div>
+          <p class="muted">展示世界文化、艺术和布莱顿本地历史的博物馆，馆藏丰富，包括埃及文物、时尚展览等。</p>
+          <p class="meta"><strong>开放时间：</strong>10:00-17:00</p>
+          <p class="meta"><strong>门票：</strong>免费入场</p>
+        </article>
+
+        <!-- Card: Regency Town House -->
+        <article class="card" data-category="play" data-name="英皇阁花园 Regency Town House">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80')"></div>
+          <div class="title">英皇阁花园 (Regency Town House)</div>
+          <p class="muted">保存完好的摄政时期联排别墅，展示了19世纪初的建筑风格和生活方式。</p>
+          <p class="meta"><strong>开放时间：</strong>10:30-16:30</p>
+          <p class="meta"><strong>门票：</strong>成人£8.50，儿童免费</p>
+        </article>
+
+        <!-- Card: Music / nightlife -->
+        <article class="card" data-category="drink" data-name="音乐现场 Music">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80')"></div>
+          <div class="title">音乐现场</div>
+          <p class="muted">布莱顿拥有丰富的音乐场景，从Concorde 2到Chalk酒吧，各种规模的场馆都有精彩的现场演出。</p>
+          <p class="meta"><strong>推荐场所：</strong>Concorde 2 / The Haunt / Patterns</p>
+          <p class="meta"><strong>最佳时间：</strong>周四至周六晚</p>
+        </article>
+
+        <!-- Card: Shopping -->
+        <article class="card" data-category="play" data-name="购物 The Lanes">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=600&q=80')"></div>
+          <div class="title">购物体验</div>
+          <p class="muted">从独立设计师品牌到古董珍品，布莱顿的购物体验丰富多彩。主要购物区包括The Lanes和Churchill Square。</p>
+          <p class="meta"><strong>推荐：</strong>手工艺品、独立品牌、古董店</p>
+        </article>
+
+        <!-- Card: Outdoor -->
+        <article class="card" data-category="play" data-name="户外 Outdoor">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80')"></div>
+          <div class="title">户外活动</div>
+          <p class="muted">布莱顿是户外运动爱好者的天堂，可以享受徒步、骑行、帆船等各类活动，南唐斯国家公园近在咫尺。</p>
+          <p class="meta"><strong>最佳季节：</strong>春夏季节最佳</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- MAP LAYOUT -->
+    <section id="map-section" style="margin-top:2rem;">
+      <div class="layout">
+        <!-- left: map -->
+        <div class="mapbox">
+          <div id="map"></div>
+        </div>
+
+        <!-- right: side panel with place list -->
+        <aside class="sidepanel" aria-label="地点列表">
+          <h3 style="margin-top:0">地图地点</h3>
+          <div id="placesList">
+            <!-- These items correspond to markers; clicking will pan map -->
+            <!-- Brighton Pier -->
+            <div class="place-item" data-name="布莱顿码头" onclick="panToLocation('布莱顿码头')">
+              <div class="place-thumb" style="background-image:url('https://i.postimg.cc/k4m3cWtC/100513000000u764p4ED0.jpg')"></div>
+              <div>
+                <div style="font-weight:700">布莱顿码头</div>
+                <div class="muted" style="font-size:.9rem">标志性海滨景点</div>
+              </div>
+            </div>
+
+            <!-- Royal Pavilion -->
+            <div class="place-item" data-name="皇家穹顶宫" onclick="panToLocation('皇家穹顶宫')">
+              <div class="place-thumb" style="background-image:url('https://i.postimg.cc/Z9VMYBHt/R.jpg')"></div>
+              <div>
+                <div style="font-weight:700">皇家穹顶宫</div>
+                <div class="muted" style="font-size:.9rem">摄政时期宫殿</div>
+              </div>
+            </div>
+
+            <!-- HK PLACE -->
+            <div class="place-item" data-name="港地 HK PLACE" onclick="panToLocation('港地 HK PLACE')">
+              <div class="place-thumb" style="background-image:url('https://dynamic-media-cdn.tripadvisor.com/media/photo-o/29/47/17/c4/caption.jpg?w=1400&h=800&s=1')"></div>
+              <div>
+                <div style="font-weight:700">港地 HK PLACE</div>
+                <div class="muted" style="font-size:.9rem">37 Preston St, Brighton</div>
+              </div>
+            </div>
+
+            <!-- 翡翠轩 -->
+            <div class="place-item" data-name="翡翠轩 厨屋面馆&KTV" onclick="panToLocation('翡翠轩 厨屋面馆&KTV')">
+              <div class="place-thumb" style="background-image:url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <div style="font-weight:700">翡翠轩 厨屋面馆&KTV</div>
+                <div class="muted" style="font-size:.9rem">29 Western road Hove BN3 1AF</div>
+              </div>
+            </div>
+
+            <!-- The Lanes -->
+            <div class="place-item" data-name="The Lanes" onclick="panToLocation('The Lanes')">
+              <div class="place-thumb" style="background-image:url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=600&q=80')"></div>
+              <div>
+                <div style="font-weight:700">The Lanes</div>
+                <div class="muted" style="font-size:.9rem">购物区</div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="margin:.8rem 0;border:none;border-top:1px solid #eee">
+
+          <div style="font-size:.92rem;color:var(--muted)">
+            <strong>使用小贴士</strong>
+            <ul style="margin:.5rem 0 0 1rem;padding:0;color:var(--muted)">
+              <li>在上方“地图定位”输入栏可快速定位上面任一地点名称（例如：Brighton Pier / 港地 HK PLACE）。</li>
+              <li>站内搜索会即时筛选卡片并高亮匹配项。</li>
+            </ul>
+          </div>
+
+        </aside>
+      </div>
+    </section>
+
+    <!-- TIPS (kept original info) -->
+    <section style="margin-top:2rem">
+      <h2 class="section-title">小tips</h2>
+      <div class="card" style="border-radius:12px">
+        <div class="row">
+          <div style="flex:1;min-width:260px">
+            <h3>交通方式</h3>
+            <p class="muted">从伦敦乘火车约1小时到1小时30分钟（视车次）。市区适合步行和骑行，公交系统也覆盖主要景点。</p>
+
+            <h3>最佳游玩季节</h3>
+            <p class="muted">春末到初秋（5–9月）为旅游旺季，夏季人多但活动多。冬季安静，适合短途周末静游。</p>
+
+            <h3>推荐行程</h3>
+            <ul class="muted">
+              <li><strong>半日游：</strong>海滨散步 → 码头拍照 → 在The Lanes吃午餐</li>
+              <li><strong>一日：</strong>上午市集/小店漫步 → 午餐 → 下午海滩/码头 → 傍晚日落与晚餐/酒吧</li>
+            </ul>
+          </div>
+
+          <div style="flex:1;min-width:260px">
+            <h3>小贴士</h3>
+            <ul class="muted">
+              <li>海边风大，关照好外套与防风装备</li>
+              <li>周末和夏季热门点建议提前预约或错峰出行</li>
+              <li>尊重当地小店的开放时间，许多独立店周一会休息</li>
+              <li>布莱顿对素食者友好，大部分餐厅都有素食选项</li>
+            </ul>
+
+            <h3>特色区域</h3>
+            <ul class="muted">
+              <li><strong>The Lanes（小巷）</strong> — 路边小餐馆、甜品店和独立咖啡</li>
+              <li><strong>North Laine</strong> — 古董店、独立商铺、街头艺术</li>
+              <li><strong>海滨区域</strong> — 海滩、码头、海鲜餐厅</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SITEMAP / ROBOTS HELP -->
+    <section style="margin-top:2rem">
+      <details>
+        <summary style="font-weight:700;cursor:pointer">部署与 SEO 帮助（包含 sitemap.xml 与 robots.txt 模板）</summary>
+        <div style="margin-top:.8rem">
+          <p class="muted">把下面的内容分别保存为 <code>sitemap.xml</code> 和 <code>robots.txt</code>，放到网站根目录后，在 Google Search Console 提交 sitemap，有助于收录。</p>
+
+          <h4>sitemap.xml</h4>
+          <pre style="background:#111;color:#fff;padding:12px;border-radius:8px;overflow:auto">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://yourdomain.example/&lt;/loc&gt;
+    &lt;changefreq&gt;weekly&lt;/changefreq&gt;
+    &lt;priority&gt;1.0&lt;/priority&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://yourdomain.example/#explore&lt;/loc&gt;
+    &lt;priority&gt;0.8&lt;/priority&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://yourdomain.example/#map-section&lt;/loc&gt;
+    &lt;priority&gt;0.5&lt;/priority&gt;
+  &lt;/url&gt;
+&lt;/urlset&gt;
+          </pre>
+
+          <h4>robots.txt</h4>
+          <pre style="background:#f6f6f6;padding:12px;border-radius:8px;overflow:auto">
+User-agent: *
+Allow: /
+Sitemap: https://yourdomain.example/sitemap.xml
+          </pre>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:1150px;margin:0 auto;padding:0 1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+        <div>&copy; 2023 布莱顿吃喝玩乐攻略 | 探索英国南海岸明珠</div>
+        <div class="links"><a href="#explore">美食</a> · <a href="#map-section">地图</a> · <a href="#info">小tips</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- libs -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <!-- tsParticles (lightweight, configurable particles) -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.9.3/tsparticles.min.js"></script>
+
+  <script>
+    AOS.init({duration:700,once:true});
+
+    // THEME TOGGLE
+    const themeToggle = document.getElementById('themeToggle');
+    function setTheme(theme){
+      if(theme === 'dark') document.documentElement.setAttribute('data-theme','dark');
+      else document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('site-theme', theme);
+    }
+    // init from storage
+    const saved = localStorage.getItem('site-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(saved);
+    themeToggle.addEventListener('click', ()=>{
+      const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      setTheme(now);
+    });
+
+    // SIMPLE SITE SEARCH (client-side)
+    const searchInput = document.getElementById('globalSearch');
+    const searchBtn = document.getElementById('searchBtn');
+    searchBtn.addEventListener('click', doSearch);
+    searchInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') doSearch(); });
+
+    function doSearch(){
+      const q = (searchInput.value || '').trim().toLowerCase();
+      const cards = document.querySelectorAll('#cardsGrid .card');
+      cards.forEach(card=>{
+        const name = (card.dataset.name || card.querySelector('.title')?.innerText || '').toLowerCase();
+        const cat = (card.dataset.category || '').toLowerCase();
+        const match = !q || name.includes(q) || cat.includes(q) || card.innerText.toLowerCase().includes(q);
+        card.style.display = match ? '' : 'none';
+        if(match){
+          card.style.boxShadow = '0 18px 42px rgba(2,6,23,.12)';
+        } else {
+          card.style.boxShadow = '';
+        }
+      });
+      // optionally highlight first match and scroll into view
+      const first = document.querySelector('#cardsGrid .card[style*="display: block"], #cardsGrid .card:not([style*="display: none"])');
+      if(first) first.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    // CATEGORY FILTER
+    function filterCategory(cat){
+      const cards = document.querySelectorAll('#cardsGrid .card');
+      cards.forEach(card=>{
+        if(cat === 'all') card.style.display = '';
+        else card.style.display = (card.dataset.category === cat) ? '' : 'none';
+      });
+      // reset search input
+      searchInput.value = '';
+    }
+
+    // INITIALIZE MAP
+    var map = L.map('map').setView([50.8203, -0.142], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // MARKERS DATA (with thumbnail for popup)
+    var locations = [
+      {
+        id: 'brighton-pier',
+        name: '布莱顿码头',
+        coords: [50.8195, -0.1425],
+        img: 'https://i.postimg.cc/k4m3cWtC/100513000000u764p4ED0.jpg',
+        description: '标志性海滨景点'
+      },
+      {
+        id: 'royal-pavilion',
+        name: '皇家穹顶宫',
+        coords: [50.8218, -0.1360],
+        img: 'https://i.postimg.cc/Z9VMYBHt/R.jpg',
+        description: '摄政时期宫殿'
+      },
+      {
+        id: 'hk-place',
+        name: '港地 HK PLACE',
+        coords: [50.82384, -0.15111],
+        img: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/29/47/17/c4/caption.jpg?w=1400&h=800&s=1',
+        description: '港式茶餐厅 — 37 Preston St, Brighton BN1 2HP'
+      },
+      {
+        id: 'jade-house',
+        name: '翡翠轩 厨屋面馆&KTV',
+        coords: [50.82545, -0.15806],
+        img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        description: '中餐厅 + KTV — 29 Western road Hove BN3 1AF'
+      },
+      {
+        id: 'the-lanes',
+        name: 'The Lanes',
+        coords: [50.8210, -0.1370],
+        img: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=600&q=80',
+        description: '购物区'
+      }
+    ];
+
+    // Create markers and keep refs
+    var markers = {};
+    locations.forEach(loc=>{
+      const icon = L.icon({ iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png', iconSize:[25,41], iconAnchor:[12,41]});
+      const m = L.marker(loc.coords, {icon: icon}).addTo(map);
+      const popupHtml = `
+        <div style="min-width:160px">
+          <div style="height:90px;background-image:url('${loc.img}');background-size:cover;background-position:center;border-radius:6px;margin-bottom:8px"></div>
+          <strong>${loc.name}</strong><br/>
+          <small style="color:#666">${loc.description}</small>
+        </div>
+      `;
+      m.bindPopup(popupHtml);
+      markers[loc.name] = {marker: m, data: loc};
+    });
+
+    // PAN TO LOCATION by name (map search or side panel click)
+    function panToLocation(name){
+      // match by exact or case-insensitive
+      const key = Object.keys(markers).find(k=>k.toLowerCase() === name.toLowerCase());
+      if(key){
+        const obj = markers[key];
+        map.setView(obj.data.coords, 16, {animate:true});
+        obj.marker.openPopup();
+        return true;
+      } else {
+        // try fuzzy: includes
+        const found = Object.keys(markers).find(k=>k.toLowerCase().includes(name.toLowerCase()));
+        if(found){
+          const obj = markers[found];
+          map.setView(obj.data.coords, 16, {animate:true});
+          obj.marker.openPopup();
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    // mapSearch input button
+    function handleMapSearch() {
+      const q = (document.getElementById('mapSearch').value || '').trim();
+      if(q) {
+        if(!panToLocation(q)) {
+          alert('未找到地图上的地点，请尝试"布莱顿码头"或"港地 HK PLACE"等名称（或从右侧列表点击）');
+        }
+      }
+    }
+
+    document.getElementById('mapSearchBtn').addEventListener('click', handleMapSearch);
+    document.getElementById('mapSearch').addEventListener('keydown', e=>{ 
+      if(e.key==='Enter') handleMapSearch();
+    });
+
+    // 添加输入时的实时搜索建议（可选）
+    document.getElementById('mapSearch').addEventListener('input', e => {
+      const value = e.target.value.trim().toLowerCase();
+      if(value.length > 1) {
+        // 可以在这里添加自动完成建议功能
+      }
+    });
+    
+    // ========== tsParticles init (particles background) ==========
+    // Using CDN tsparticles.min.js loaded above
+    (function initParticles(){
+      if(typeof tsParticles === 'undefined'){ 
+        console.warn('tsParticles 未加载'); 
+        return; 
+      }
+      tsParticles.load('tsparticles', {
+        fullScreen: { enable: false }, // we use container size
+        emitters: [],
+        particles: {
+          number: { value: 60 },
+          color: { value: ['#ff8a8a', '#8ad1ff', '#ffd38a'] },
+          shape: { type: 'circle' },
+          opacity: { value: 0.6, random: { enable: true, minimumValue: 0.2 } },
+          size: { value: { min: 1.5, max: 5 }, animation: { enable: true, speed: 2, minimumValue: 1 } },
+          move: {
+            enable: true,
+            speed: { min: 0.2, max: 1.2 },
+            direction: 'none',
+            outModes: { default: 'out' },
+            attract: { enable: false }
+          },
+          links: {
+            enable: true,
+            distance: 120,
+            color: '#ffffff',
+            opacity: 0.06,
+            width: 1
+          }
+        },
+        interactivity: {
+          events: {
+            onHover: { enable: true, mode: 'repulse' },
+            onClick: { enable: true, mode: 'push' },
+            resize: true
+          },
+          modes: {
+            repulse: { distance: 120, duration: 0.4 },
+            push: { quantity: 4 }
+          }
+        },
+        detectRetina: true
+      }).then(container => {
+        // gently lower particle opacity based on theme
+        const theme = document.documentElement.getAttribute('data-theme');
+        if(theme === 'dark' && container) {
+          container.canvas.element.style.opacity = 0.9;
+        }
+      }).catch(err=>console.error(err));
+    })();
+
+    // ================= mouse-follow cursor light =================
+    (function cursorLight(){
+      const light = document.getElementById('cursorLight');
+      if (!light) return;
+      
+      let lastMove = 0;
+      document.addEventListener('mousemove', (e)=>{
+        lastMove = Date.now();
+        const x = e.clientX;
+        const y = e.clientY;
+        light.style.transform = `translate(${x - 110}px, ${y - 110}px) scale(1)`;
+        light.classList.remove('hidden');
+      });
+      // fade out when idle
+      setInterval(()=>{
+        if(Date.now() - lastMove > 1600) light.classList.add('hidden');
+      }, 500);
+      // mobile touch: show at center until touch moves
+      document.addEventListener('touchstart', (e)=>{
+        const touch = e.touches[0];
+        if(touch) light.style.transform = `translate(${touch.clientX - 110}px, ${touch.clientY - 110}px) scale(1.2)`;
+      }, {passive:true});
+      document.addEventListener('touchmove', (e)=>{
+        const touch = e.touches[0];
+        if(touch) light.style.transform = `translate(${touch.clientX - 110}px, ${touch.clientY - 110}px) scale(1.2)`;
+      }, {passive:true});
+    })();
+
+    // ensure background layers don't intercept pointer (they're pointer-events: none)
+    // all original interactive elements remain functional.
+
+    // place items clickable are wired in HTML via onclick handlers (panToLocation)
+  </script>
+
+</body>
+</html>
